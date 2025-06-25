@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Helper for Teachers</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Lato for readability -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for theming */
+        :root {
+            --bg-color: #f0f4f8; /* Light gray background */
+            --text-color: #333; /* Dark text */
+            --container-bg: #ffffff; /* White container background */
+            --card-bg: #e0f2fe; /* Light blue card background */
+            --card-border: #90cdf4; /* Medium blue border */
+            --section-title-color: #1e40af; /* Darker blue for titles */
+            --prompt-area-bg: #f3f4f6; /* Lighter gray for prompt area */
+            --prompt-area-border: #d1d5db; /* Gray border */
+            --button-primary-bg: #f3f4f6; /* Matches prompt area bg for light mode */
+            --button-primary-hover-bg: #eff6ff; /* Very light blue hover (from outline hover) */
+            --button-primary-text: #333; /* Dark text */
+            --button-secondary-bg: #e5e7eb; /* Light gray secondary button */
+            --button-secondary-hover-bg: #d1d5db; /* Darker gray hover */
+            --button-secondary-text: #374151; /* Dark gray text */
+            --button-outline-border: #3b82f6; /* Blue outline button border */
+            --button-outline-text: #2563eb; /* Blue text */
+            --button-outline-hover-bg: #eff6ff; /* Very light blue hover */
+            --input-border: #d1d5db; /* Gray input border */
+            --input-focus-ring: #3b82f6; /* Blue focus ring */
+        }
+
+        /* Dark Mode variables */
+        body.dark-mode {
+            --bg-color: #1a202c; /* Dark blue-gray background */
+            --text-color: #e0e0e0; /* Lighter grey text for better readability */
+            --container-bg: #2d3748; /* Darker blue-gray container */
+            --card-bg: #4a5568; /* Even darker blue-gray card */
+            --card-border: #6366f1; /* Purple border for contrast */
+            --section-title-color: #bb86fc; /* Lighter purple for titles (accessible) */
+            --prompt-area-bg: #2c313a; /* Darker prompt area */
+            --prompt-area-border: #4a5568; /* Darker gray border */
+            --button-primary-bg: #2c313a; /* Matches prompt area bg for dark mode */
+            --button-primary-hover-bg: #4a5568; /* Darker hover (from outline hover) */
+            --button-primary-text: #e0e0e0; /* Light text */
+            --button-secondary-bg: #718096; /* Gray secondary button */
+            --button-secondary-hover-bg: #5f6b7e; /* Darker gray hover */
+            --button-secondary-text: #e0e0e0; /* Light text */
+            --button-outline-border: #6366f1; /* Purple outline button border */
+            --button-outline-text: #bb86fc; /* Light purple text */
+            --button-outline-hover-bg: #4a5568; /* Darker hover */
+            --input-border: #4a5568; /* Darker input border */
+            --input-focus-ring: #bb86fc; /* Light purple focus ring */
+        }
+
+        /* Apply CSS variables */
+        body {
+            font-family: 'Lato', sans-serif; /* Using Lato font */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            letter-spacing: 0.02em; /* Added letter spacing */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
+        }
+        .container {
+            background-color: var(--container-bg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            transition: background-color 0.3s ease;
+        }
+        /* Base button styles - apply to all buttons for consistency */
+        .btn {
+            @apply px-8 py-4 rounded-full font-semibold transition-all duration-300 ease-in-out; /* Increased padding, fully rounded */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Primary buttons now match the "Students will be able to" style */
+        .btn-primary {
+            background-color: var(--button-primary-bg); /* Use the explicit primary button background */
+            color: var(--button-primary-text); /* Use the explicit primary button text color */
+            border: 2px solid var(--input-border); /* Keep consistent border for both themes */
+        }
+        .btn-primary:hover {
+            background-color: var(--button-primary-hover-bg); /* Use explicit primary button hover */
+        }
+
+        .btn-secondary {
+            background-color: var(--button-secondary-bg);
+            color: var(--button-secondary-text);
+        }
+        .btn-secondary:hover {
+            background-color: var(--button-secondary-hover-bg);
+        }
+        .btn-outline {
+            border: 1px solid var(--button-outline-border);
+            color: var(--button-outline-text);
+        }
+        .btn-outline:hover {
+            background-color: var(--button-outline-hover-bg);
+        }
+        .input-field, .textarea-field, .select-field {
+            background-color: var(--container-bg); /* Use container bg for inputs */
+            color: var(--text-color);
+            border-color: var(--input-border);
+            border-width: 2px; /* Make borders a bit thicker for noticeability */
+            @apply py-3 px-4 rounded-lg; /* Added vertical padding and slight rounding for inputs */
+        }
+        .input-field:focus, .textarea-field:focus, .select-field:focus {
+            border-color: var(--input-focus-ring); /* Keep focus ring noticeable */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Add subtle shadow to focus */
+        }
+        .section-title {
+            color: var(--section-title-color);
+            @apply mb-6; /* Increased bottom margin for titles */
+        }
+        .step-card {
+            background-color: var(--card-bg);
+            border-color: var(--card-border);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            @apply p-8; /* Increased padding within step cards */
+        }
+        .prompt-output-area, .ai-response-area {
+            background-color: var(--prompt-area-bg);
+            border-color: var(--prompt-area-border);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            @apply py-6 px-4 rounded-lg; /* Increased vertical padding for output areas, slight rounding */
+        }
+        /* Style for unordered and ordered lists within the AI response */
+        .ai-response-area ul, .ai-response-area ol {
+            @apply list-inside mb-4 pl-5; /* Tailwind classes for lists */
+        }
+        .ai-response-area ul li {
+            @apply list-disc mb-2; /* Disc bullets for ul */
+        }
+        .ai-response-area ol li {
+            @apply list-decimal mb-2; /* Decimal numbers for ol */
+        }
+        .ai-response-area p {
+            @apply mb-4; /* Margin for paragraphs */
+        }
+
+        .loading-spinner {
+            border-left-color: var(--button-primary-bg); /* Use primary button color for spinner */
+        }
+
+        /* Styles for the theme toggle button */
+        #theme-toggle {
+            @apply absolute top-4 right-4 px-4 py-2 rounded-full text-base cursor-pointer font-semibold flex items-center space-x-2;
+            background-color: var(--button-secondary-bg); /* Consistent secondary style */
+            color: var(--button-secondary-text);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #theme-toggle:hover {
+            background-color: var(--button-secondary-hover-bg);
+        }
+        #theme-toggle .icon {
+            @apply text-xl; /* Size for the emoji icon */
+        }
+
+        /* Styles for Previous Page button */
+        #previous-page-btn {
+            @apply absolute top-4 left-4 px-4 py-2 rounded-full text-sm flex items-center space-x-1 font-semibold;
+            background-color: var(--button-secondary-bg); /* Consistent secondary style */
+            color: var(--button-secondary-text);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #previous-page-btn:hover {
+            background-color: var(--button-secondary-hover-bg);
+        }
+        #previous-page-btn.hidden {
+            display: none !important;
+        }
+
+        /* Specific styling for Learning Objective components to fit on one line */
+        .learning-objective-group {
+            @apply flex flex-col sm:flex-row sm:items-center sm:space-x-2; /* Flex for desktop, stack for mobile */
+        }
+        .learning-objective-group span {
+            @apply py-3 px-4 rounded-full flex-shrink-0; /* Match button/input styling - now rounded-full */
+            background-color: var(--prompt-area-bg);
+            border-color: var(--input-border);
+            color: var(--text-color);
+            border-width: 2px;
+            margin-bottom: 0.5rem; /* Space between elements on mobile */
+            white-space: nowrap; /* Prevent "Students will be able to" from wrapping */
+        }
+        .learning-objective-group select {
+            @apply flex-grow; /* Allows it to expand to fill space */
+            min-width: 80px; /* Smallest it can be */
+        }
+        .learning-objective-group input[type="text"] {
+            @apply flex-grow; /* Allows it to expand to fill space */
+            min-width: 100px; /* Smallest it can be */
+        }
+
+        @media (min-width: 640px) { /* Small breakpoint, for horizontal layout */
+            .learning-objective-group span {
+                margin-bottom: 0; /* Remove mobile spacing */
+            }
+            .learning-objective-group select,
+            .learning-objective-group input[type="text"] {
+                flex-basis: 0; /* Allow flex items to grow from a base of 0 */
+            }
+        }
+
+        /* Style for selected format buttons */
+        .btn-primary.selected {
+            @apply ring-2 ring-offset-2;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Stronger shadow on selected */
+            ring-color: var(--button-outline-border); /* Use accent color for ring */
+            background-color: var(--button-outline-hover-bg); /* Slight hover effect */
+        }
+        /* Dark mode specific selected style */
+        body.dark-mode .btn-primary.selected {
+            ring-color: var(--button-outline-border);
+            background-color: var(--button-outline-hover-bg);
+        }
+
+        /* Styles for disabled task buttons */
+        .btn-primary.task-disabled {
+            @apply opacity-50 cursor-not-allowed;
+            /* Override hover effects for disabled state - now using specific grey colors */
+            background-color: #e0e0e0 !important; /* Lighter grey for disabled background */
+            color: #9e9e9e !important; /* Darker grey for disabled text */
+            box-shadow: none !important;
+            border-color: #cccccc !important; /* Lighter border for disabled */
+        }
+
+        body.dark-mode .btn-primary.task-disabled {
+            background-color: #3f4a59 !important; /* Darker grey for disabled background in dark mode */
+            color: #a0a8b3 !important; /* Lighter grey for disabled text in dark mode */
+            border-color: #5d6776 !important; /* Darker border for disabled in dark mode */
+        }
+
+        /* New styles for the AI follow-up buttons container */
+        #ai-followup-buttons {
+            @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6; /* Responsive grid with gaps */
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="container relative">
+        <!-- Theme Toggle Button (now includes text and icon) -->
+        <button id="theme-toggle" aria-label="Toggle dark mode">
+            <span class="icon">☀️</span>
+            <span>Light Mode</span>
+        </button>
+
+        <!-- Previous Page Button -->
+        <button id="previous-page-btn" class="hidden">
+            &larr; Previous Page
+        </button>
+
+        <h1 class="text-4xl font-extrabold text-center mb-8 text-blue-800">
+            AI Prompt Helper for Teachers
+        </h1>
+        <p class="text-center text-lg mb-8 text-gray-700">
+            Select options below to build a customised AI prompt for your teaching needs.
+        </p>
+
+        <!-- Step 1: Persona -->
+        <div id="step1" class="step-card">
+            <h2 class="section-title">Step 1: Persona - Who should the AI be?</h2>
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
+                    <span class="py-3 px-4 rounded-full flex-shrink-0" style="background-color: var(--prompt-area-bg); border-color: var(--input-border); color: var(--text-color); border-width: 2px;">You are a</span>
+                    <select id="persona-year-level" name="persona-year-level" class="select-field flex-grow mb-2 sm:mb-0">
+                        <option value="">Select Year Level (optional)</option>
+                        <option value="Foundation">Foundation (Prep/Kindergarten)</option>
+                        <option value="Year 1">Year 1</option>
+                        <option value="Year 2">Year 2</option>
+                        <option value="Year 3">Year 3</option>
+                        <option value="Year 4">Year 4</option>
+                        <option value="Year 5">Year 5</option>
+                        <option value="Year 6">Year 6</option>
+                        <option value="Year 7">Year 7</option>
+                        <option value="Year 8">Year 8</option>
+                        <option value="Year 9">Year 9</option>
+                        <option value="Year 10">Year 10</option>
+                        <option value="Year 11">Year 11</option>
+                        <option value="Year 12">Year 12</option>
+                        <option value="Primary School">Primary School (General)</option>
+                        <option value="Secondary School">Secondary School (General)</option>
+                        <option value="Adult Learners">Adult Learners</option>
+                    </select>
+                    <select id="persona-role" name="persona-role" class="select-field flex-grow">
+                        <option value="">Select Role</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="student">Student</option>
+                        <option value="SLC">SLC</option>
+                        <option value="curriculum expert">Curriculum Expert</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6">
+                <label for="additional-persona-context" class="block text-gray-700 text-sm font-bold mb-1">Add any additional persona context here (optional):</label>
+                <input type="text" id="additional-persona-context" name="additional-persona-context" placeholder="e.g., specialising in inclusive education" class="input-field w-full">
+            </div>
+             <div class="flex justify-end mt-6">
+                <button id="next-to-task-btn" class="btn btn-primary">Next: Choose Task</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Task -->
+        <div id="step2" class="step-card hidden">
+            <h2 class="section-title">Step 2: Task - What do you want the AI to do?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button class="btn btn-primary" data-task="Draft a lesson plan" data-allowed-roles="teacher,SLC,curriculum expert">Draft a lesson plan</button>
+                <button class="btn btn-primary" data-task="Design an activity" data-allowed-roles="teacher,SLC,curriculum expert">Design an activity</button>
+                <button class="btn btn-primary" data-task="Create a rubric" data-allowed-roles="teacher,SLC,curriculum expert">Create a rubric</button>
+                <button class="btn btn-primary" data-task="Generate an assessment question" data-allowed-roles="teacher,SLC,curriculum expert">Generate an assessment question</button>
+                <button class="btn btn-primary" data-task="Analyse an image" data-allowed-roles="teacher,student,SLC,curriculum expert">Analyse an image</button>
+                <button class="btn btn-primary" data-task="Rewrite text" data-allowed-roles="teacher,student,SLC,curriculum expert">Rewrite text</button>
+                <button class="btn btn-primary" data-task="Provide feedback" data-allowed-roles="teacher,student,SLC,curriculum expert">Provide feedback</button>
+                <button class="btn btn-primary" data-task="Explain a concept" data-allowed-roles="teacher,student,SLC,curriculum expert">Explain a concept</button>
+                <button class="btn btn-primary" data-task="Suggest resources" data-allowed-roles="teacher,SLC,curriculum expert">Suggest resources</button>
+                <button class="btn btn-primary" data-task="Outline a presentation" data-allowed-roles="teacher,student,SLC,curriculum expert">Outline a presentation</button>
+                <button class="btn btn-primary" data-task="Brainstorm ideas" data-allowed-roles="teacher,student,SLC,curriculum expert">Brainstorm ideas</button>
+                <button class="btn btn-primary" data-task="Summarise information" data-allowed-roles="teacher,student,SLC,curriculum expert">Summarise information</button>
+                <button class="btn btn-primary" data-task="Differentiate content" data-allowed-roles="teacher,SLC,curriculum expert">Differentiate content</button>
+                <button class="btn btn-primary" data-task="Identify misconceptions" data-allowed-roles="teacher,student,SLC,curriculum expert">Identify misconceptions</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Context -->
+        <div id="step3" class="step-card hidden">
+            <h2 class="section-title">Step 3: Context - Provide details and background</h2>
+            <form id="context-form" class="space-y-4">
+                <!-- Dynamic inputs for context will be inserted here by JavaScript -->
+            </form>
+            <div class="flex justify-end mt-6">
+                <button id="next-to-format-btn" class="btn btn-primary">Next: Choose Format</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Format -->
+        <div id="step4" class="step-card hidden">
+            <h2 class="section-title">Step 4: Format - How should the AI present the output?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button class="btn btn-primary" data-format="in bullet points">Bullet points</button>
+                <button class="btn btn-primary" data-format="as a numbered list">Numbered list</button>
+                <button class="btn btn-primary" data-format="in table format">Table format</button>
+                <button class="btn btn-primary" data-format="as a short paragraph">Short paragraph</button>
+                <button class="btn btn-primary" data-format="as a detailed report">Detailed report</button>
+                <button class="btn btn-primary" data-format="as quiz questions with answers">Quiz questions with answers</button>
+                <button class="btn btn-primary" data-format="as a mind map outline">Mind map outline</button>
+                <button class="btn btn-primary" data-format="as a flowchart description">Flowchart description</button>
+            </div>
+            <div class="mt-6">
+                <label for="other-format" class="block text-gray-700 text-sm font-bold mb-1">Other Format (optional):</label>
+                <input type="text" id="other-format" name="other-format" placeholder="e.g., as a dialogue, in a poem" class="input-field w-full">
+            </div>
+             <div class="flex justify-end mt-6">
+                <button id="generate-prompt-btn" class="btn btn-primary" disabled>Generate Prompt</button>
+            </div>
+        </div>
+
+
+        <!-- Generated Prompt Output -->
+        <div id="prompt-output-section" class="step-card hidden">
+            <h2 class="section-title">Your Generated AI Prompt:</h2>
+            <div id="generated-prompt" class="prompt-output-area text-gray-800 text-lg italic">
+                Your prompt will appear here.
+            </div>
+            <div id="ai-followup-buttons">
+                <button id="copy-prompt-btn" class="btn btn-secondary">Copy Prompt</button>
+                <button id="ask-ai-btn" class="btn btn-primary">Ask AI</button>
+                <button id="generate-quiz-btn" class="btn btn-primary hidden">✨ Generate Quiz Questions</button>
+                <button id="suggest-strategies-btn" class="btn btn-primary hidden">✨ Suggest Learning Strategies</button>
+                <button id="translate-plain-lang-btn" class="btn btn-primary hidden">✨ Translate to Plain Language</button>
+                <button id="generate-more-ideas-btn" class="btn btn-primary hidden">✨ Generate More Ideas</button>
+                <button id="break-down-concept-btn" class="btn btn-primary hidden">✨ Break Down Concept</button>
+                <button id="suggest-warm-up-btn" class="btn btn-primary hidden">✨ Suggest Warm-up</button>
+                <!-- New Gemini-powered buttons -->
+                <button id="generate-study-questions-btn" class="btn btn-primary hidden">✨ Generate Study Questions</button>
+                <button id="create-vocabulary-flashcards-btn" class="btn btn-primary hidden">✨ Create Vocabulary Flashcards</button>
+                <button id="suggest-differentiated-activities-btn" class="btn btn-primary hidden">✨ Suggest Differentiated Activities</button>
+                <button id="generate-icebreaker-warmup-btn" class="btn btn-primary hidden">✨ Generate Icebreaker/Warm-up Idea</button>
+
+                <button id="generate-differentiated-text-btn" class="btn btn-primary hidden">✨ Differentiate Text</button>
+                <button id="suggest-assessment-formats-btn" class="btn btn-primary hidden">✨ Suggest Assessment Formats</button>
+                <button id="create-vocabulary-list-btn" class="btn btn-primary hidden">✨ Create Vocabulary List</button>
+                <button id="start-over-btn" class="btn btn-outline">Start Over</button>
+            </div>
+        </div>
+
+        <!-- AI Response Area -->
+        <div id="ai-response-section" class="step-card hidden">
+            <h2 class="section-title">AI Response:</h2>
+            <div id="ai-response" class="ai-response-area relative">
+                <div id="loading-indicator" class="hidden absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
+                    <div class="loading-spinner"></div>
+                </div>
+                The AI's response will appear here.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables to store the selected options and form data
+        let selectedPersonaYearLevel = ''; // New: For persona year level dropdown
+        let selectedPersonaRole = ''; // New: For persona role dropdown
+        let selectedTask = '';
+        let selectedFormat = ''; // New variable for format
+        let generatedPrompt = '';
+        let currentFormData = {}; // To store the specific inputs from step 3 (Context)
+        let currentStep = 1; // Track the current step
+
+        // DOM elements
+        const body = document.body;
+        const themeToggle = document.getElementById('theme-toggle');
+        const previousPageBtn = document.getElementById('previous-page-btn');
+        const step1 = document.getElementById('step1'); // Persona
+        const step2 = document.getElementById('step2'); // Task
+        const step3 = document.getElementById('step3'); // Context
+        const step4 = document.getElementById('step4'); // Format (new)
+        const specificsForm = document.getElementById('context-form'); // Renamed from specifics-form
+        const generatePromptBtn = document.getElementById('generate-prompt-btn'); // Still used for final generation
+        const promptOutputSection = document.getElementById('prompt-output-section');
+        const generatedPromptDisplay = document.getElementById('generated-prompt');
+        const copyPromptBtn = document.getElementById('copy-prompt-btn');
+        const askAiBtn = document.getElementById('ask-ai-btn');
+
+        // AI-powered buttons (existing)
+        const generateQuizBtn = document.getElementById('generate-quiz-btn');
+        const suggestStrategiesBtn = document.getElementById('suggest-strategies-btn');
+        const translatePlainLangBtn = document.getElementById('translate-plain-lang-btn');
+        const generateMoreIdeasBtn = document.getElementById('generate-more-ideas-btn');
+        const breakDownConceptBtn = document.getElementById('break-down-concept-btn');
+        const suggestWarmUpBtn = document.getElementById('suggest-warm-up-btn');
+        const generateDifferentiatedTextBtn = document.getElementById('generate-differentiated-text-btn');
+        const suggestAssessmentFormatsBtn = document.getElementById('suggest-assessment-formats-btn');
+        const createVocabularyListBtn = document.getElementById('create-vocabulary-list-btn'); // This might be repurposed or removed based on flashcards
+
+        // New Gemini-powered buttons (from previous update)
+        const generateStudyQuestionsBtn = document.getElementById('generate-study-questions-btn');
+        const createVocabularyFlashcardsBtn = document.getElementById('create-vocabulary-flashcards-btn');
+        const suggestDifferentiatedActivitiesBtn = document.getElementById('suggest-differentiated-activities-btn');
+        const generateIcebreakerWarmupBtn = document.getElementById('generate-icebreaker-warmup-btn');
+
+        const startOverBtn = document.getElementById('start-over-btn');
+        const aiResponseSection = document.getElementById('ai-response-section');
+        const aiResponseDisplay = document.getElementById('ai-response');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // New elements for Persona and Format inputs
+        const personaYearLevelSelect = document.getElementById('persona-year-level'); // New
+        const personaRoleSelect = document.getElementById('persona-role'); // New
+        const additionalPersonaContextInput = document.getElementById('additional-persona-context'); // Renamed from other-persona
+        const nextToTaskBtn = document.getElementById('next-to-task-btn');
+        const otherFormatInput = document.getElementById('other-format');
+        const nextToFormatBtn = document.getElementById('next-to-format-btn');
+
+
+        // --- Core Logic Functions ---
+
+        /**
+         * Function to show a step and hide others
+         * @param {HTMLElement} stepToShow - The DOM element of the step to display.
+         */
+        function showStep(stepToShow) {
+            [step1, step2, step3, step4, promptOutputSection, aiResponseSection].forEach(step => {
+                step.classList.add('hidden');
+            });
+            stepToShow.classList.remove('hidden');
+            
+            // Hide all Gemini-powered buttons by default when switching steps
+            hideAllGeminiButtons();
+
+            // Update current step and previous button visibility
+            if (stepToShow === step1) {
+                currentStep = 1;
+                previousPageBtn.classList.add('hidden');
+            } else if (stepToShow === step2) {
+                currentStep = 2;
+                previousPageBtn.classList.remove('hidden');
+                updateTaskButtonStates(); // Update task button states when showing step 2
+            } else if (stepToShow === step3) {
+                currentStep = 3;
+                previousPageBtn.classList.remove('hidden');
+            } else if (stepToShow === step4) {
+                currentStep = 4;
+                previousPageBtn.classList.remove('hidden');
+                updateGeneratePromptButtonState(); // Set initial state when step 4 is shown
+            } else if (stepToShow === promptOutputSection) {
+                currentStep = 5;
+                previousPageBtn.classList.remove('hidden');
+            } else if (stepToShow === aiResponseSection) {
+                currentStep = 6;
+                previousPageBtn.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Renders the specific input fields for the Context step based on the selected task.
+         */
+        function renderContextInputs() {
+            specificsForm.innerHTML = ''; // Clear previous inputs
+            let inputsHtml = '';
+
+            // Always include Topic and Learning Objective
+            inputsHtml += `
+                <label for="topic" class="block text-gray-700 text-sm font-bold mb-1">Topic/Subject: <span class="text-red-500">*</span></label>
+                <input type="text" id="topic" name="topic" placeholder="e.g., Photosynthesis" class="input-field w-full mb-4" required>
+
+                <label class="block text-gray-700 text-sm font-bold mb-1">Learning Objective (optional):</label>
+                <div class="learning-objective-group mb-4">
+                    <span class="py-3 px-4 rounded-full flex-shrink-0" style="background-color: var(--prompt-area-bg); border-color: var(--input-border); color: var(--text-color); border-width: 2px;">Students will be able to</span>
+                    <select id="learning-objective-verb" name="learning-objective-verb" class="select-field flex-grow">
+                        <option value="">Select Action Verb</option>
+                        <option value="explain">explain</option>
+                        <option value="describe">describe</option>
+                        <option value="outline">outline</option>
+                        <option value="draw">draw</option>
+                        <option value="summarise">summarise</option>
+                        <option value="analyse">analyse</option>
+                        <option value="compare">compare</option>
+                        <option value="create">create</option>
+                        <option value="evaluate">evaluate</option>
+                        <option value="identify">identify</option>
+                        <option value="demonstrate">demonstrate</option>
+                        <option value="apply">apply</option>
+                        <option value="discuss">discuss</option>
+                    </select>
+                    <input type="text" id="learning-objective-content" name="learning-objective-content" placeholder="e.g., the steps of photosynthesis." class="input-field mt-2 sm:mt-0 ml-0 sm:ml-2">
+                </div>
+            `;
+
+            // Conditional inputs based on selected task
+            if (selectedTask.includes('rubric') || selectedTask.includes('assessment question')) {
+                inputsHtml += `
+                    <label for="criteria" class="block text-gray-700 text-sm font-bold mb-1">Specific Criteria/Skills (optional):</label>
+                    <textarea id="criteria" name="criteria" rows="2" placeholder="e.g., Clarity, evidence, organisation for an essay" class="textarea-field w-full mb-4"></textarea>
+                `;
+            }
+
+            if (selectedTask.includes('image')) {
+                inputsHtml += `
+                    <label for="image-description" class="block text-gray-700 text-sm font-bold mb-1">Description of the image: <span class="text-red-500">*</span></label>
+                    <textarea id="image-description" name="image-description" rows="3" placeholder="e.g., A whimsical cartoon of a rocket ship blasting off to a planet made of cheese." class="textarea-field w-full mb-4" required></textarea>
+                `;
+            }
+
+            if (selectedTask.includes('Rewrite text')) {
+                inputsHtml += `
+                    <label for="original-text" class="block text-gray-700 text-sm font-bold mb-1">Original text to rewrite: <span class="text-red-500">*</span></label>
+                    <textarea id="original-text" name="original-text" rows="4" placeholder="Paste the text you want to rewrite here." class="textarea-field w-full mb-4" required></textarea>
+                    
+                    <label for="rewrite-purpose" class="block text-gray-700 text-sm font-bold mb-1">Purpose/Style of rewrite (optional):</label>
+                    <input type="text" id="rewrite-purpose" name="rewrite-purpose" placeholder="e.g., Simplify for younger students, make more formal" class="input-field w-full mb-4">
+                `;
+            }
+
+            if (selectedTask.includes('Provide feedback')) {
+                inputsHtml += `
+                    <label for="feedback-content" class="block text-gray-700 text-sm font-bold mb-1">Content to provide feedback on (paste or describe): <span class="text-red-500">*</span></label>
+                    <textarea id="feedback-content" name="feedback-content" rows="4" placeholder="e.g., Paste student essay here, or describe the activity results." class="textarea-field w-full mb-4" required></textarea>
+                    
+                    <label for="feedback-criteria" class="block text-gray-700 text-sm font-bold mb-1">Feedback criteria/focus (optional):</label>
+                    <textarea id="feedback-criteria" name="feedback-criteria" rows="2" placeholder="e.g., Focus on grammar and coherence, or provide growth mindset feedback." class="textarea-field w-full mb-4"></textarea>
+                `;
+            }
+
+            if (selectedTask.includes('Summarise information')) {
+                inputsHtml += `
+                    <label for="summary-content" class="block text-gray-700 text-sm font-bold mb-1">Content to summarise: <span class="text-red-500">*</span></label>
+                    <textarea id="summary-content" name="summary-content" rows="4" placeholder="Paste the text or describe the information to summarise." class="textarea-field w-full mb-4" required></textarea>
+                    
+                    <label for="summary-length" class="block text-gray-700 text-sm font-bold mb-1">Desired summary length (optional):</label>
+                    <input type="text" id="summary-length" name="summary-length" placeholder="e.g., 100 words, 3 bullet points" class="input-field w-full mb-4">
+                `;
+            }
+
+            if (selectedTask.includes('Differentiate content')) {
+                inputsHtml += `
+                    <label for="differentiate-content" class="block text-gray-700 text-sm font-bold mb-1">Content to differentiate: <span class="text-red-500">*</span></label>
+                    <textarea id="differentiate-content" name="differentiate-content" rows="4" placeholder="Paste the text or describe the content to differentiate." class="textarea-field w-full mb-4" required></textarea>
+                    
+                    <label for="target-levels" class="block text-gray-700 text-sm font-bold mb-1">Target differentiation levels (optional):</label>
+                    <input type="text" id="target-levels" name="target-levels" placeholder="e.g., struggling learners, on-level, advanced" class="input-field w-full mb-4">
+                `;
+            }
+
+            if (selectedTask.includes('misconceptions')) {
+                 inputsHtml += `
+                    <label for="misconceptions-topic" class="block text-gray-700 text-sm font-bold mb-1">Specific topic for misconceptions: (optional)</label>
+                    <input type="text" id="misconceptions-topic" name="misconceptions-topic" placeholder="e.g., Phases of the Moon, Fractions" class="input-field w-full mb-4">
+                    <label for="existing-misconceptions" class="block text-gray-700 text-sm font-bold mb-1">Known/observed misconceptions (optional):</label>
+                    <textarea id="existing-misconceptions" name="existing-misconceptions" rows="2" placeholder="e.g., Students believe plants eat soil." class="textarea-field w-full mb-4"></textarea>
+                `;
+            }
+
+
+            // Australian Curriculum input (remains textarea for flexibility)
+            inputsHtml += `
+                <label for="australian-curriculum" class="block text-gray-700 text-sm font-bold mb-1">Australian Curriculum Version 9 (optional):</label>
+                <textarea id="australian-curriculum" name="australian-curriculum" rows="2" placeholder="e.g., AC9S2U01 - identifying how animals use their body parts for different purposes; Cross-curriculum priority: Aboriginal and Torres Strait Islander Histories and Cultures" class="textarea-field w-full mb-4"></textarea>
+            `;
+
+            inputsHtml += `
+                <label for="additional-notes" class="block text-gray-700 text-sm font-bold mb-1">Additional Notes/Constraints (optional):</label>
+                <textarea id="additional-notes" name="additional-notes" rows="3" placeholder="e.g., Ensure cultural sensitivity, include interactive elements." class="textarea-field w-full"></textarea>
+            `;
+
+            specificsForm.innerHTML = inputsHtml;
+
+            // Mark required fields visually
+            specificsForm.querySelectorAll('input[required], textarea[required]').forEach(input => {
+                const label = input.previousElementSibling;
+                if (label && !label.querySelector('.text-red-500')) { // Avoid adding multiple asterisks
+                    label.innerHTML += ' <span class="text-red-500">*</span>';
+                }
+            });
+        }
+
+        /**
+         * Constructs the final prompt string based on selected options and user input.
+         */
+        function generatePrompt() {
+            // Retrieve data from context form
+            const formData = new FormData(specificsForm);
+            currentFormData = Object.fromEntries(formData.entries());
+
+            let promptParts = [];
+
+            // 1. Persona
+            let personaPhrase = '';
+            const personaYearLevel = personaYearLevelSelect.value.trim();
+            const personaRole = personaRoleSelect.value.trim();
+            const additionalPersona = additionalPersonaContextInput.value.trim();
+
+            if (personaYearLevel && personaRole) {
+                personaPhrase = `a ${personaYearLevel} ${personaRole}`;
+            } else if (personaRole) {
+                personaPhrase = `a ${personaRole}`;
+            } else if (personaYearLevel) {
+                 personaPhrase = `a ${personaYearLevel} student/teacher`; // Default if only year level is selected
+            }
+
+            if (additionalPersona) {
+                if (personaPhrase) {
+                    personaPhrase += ` ${additionalPersona}`;
+                } else {
+                    personaPhrase = additionalPersona;
+                }
+            }
+            if (personaPhrase) {
+                promptParts.push(`You are ${personaPhrase}.`);
+            } else {
+                // If no persona selected, provide a generic one to avoid breaking the prompt
+                promptParts.push(`You are an AI assistant for educators.`);
+            }
+
+            // 2. Task
+            if (selectedTask) {
+                promptParts.push(`${selectedTask}`);
+            }
+
+            // 3. Context
+            // Add context fields based on selectedTask and user input
+            let contextParts = [];
+            // Topic and Learning Objective are now always included
+            if (currentFormData.topic) contextParts.push(`on the topic of "${currentFormData.topic}"`);
+            
+            // Use the year level from Step 1 for context
+            if (selectedPersonaYearLevel && selectedPersonaYearLevel !== '') contextParts.push(`for ${selectedPersonaYearLevel} students`);
+
+
+            let learningObjectivePhrase = '';
+            const loVerb = currentFormData['learning-objective-verb'];
+            const loContent = currentFormData['learning-objective-content'];
+            if (loVerb && loVerb !== '') {
+                learningObjectivePhrase += `students will be able to ${loVerb}`;
+                if (loContent) {
+                    learningObjectivePhrase += ` ${loContent}`;
+                }
+            } else if (loContent) {
+                learningObjectivePhrase += `students will be able to ${loContent}`;
+            }
+            if (learningObjectivePhrase) {
+                contextParts.push(`with the learning objective: "${learningObjectivePhrase}"`);
+            }
+
+            if (currentFormData.criteria) contextParts.push(`focusing on the criteria: "${currentFormData.criteria}"`);
+            if (currentFormData['image-description']) contextParts.push(`of the image described as: "${currentFormData['image-description']}"`);
+            if (currentFormData['original-text']) contextParts.push(`the following text: "${currentFormData['original-text']}"`);
+            if (currentFormData['rewrite-purpose']) contextParts.push(`with the purpose: "${currentFormData['rewrite-purpose']}"`);
+            if (currentFormData['feedback-content']) contextParts.push(`on this content: "${currentFormData['feedback-content']}"`);
+            if (currentFormData['feedback-criteria']) contextParts.push(`with feedback criteria: "${currentFormData['feedback-criteria']}"`);
+            if (currentFormData['summary-content']) contextParts.push(`the content: "${currentFormData['summary-content']}"`);
+            if (currentFormData['summary-length']) contextParts.push(`to be "${currentFormData['summary-length']}" long`);
+            if (currentFormData['differentiate-content']) contextParts.push(`the content: "${currentFormData['differentiate-content']}"`);
+            if (currentFormData['target-levels']) contextParts.push(`for target levels: "${currentFormData['target-levels']}"`);
+            if (currentFormData['misconceptions-topic']) contextParts.push(`for the topic "${currentFormData['misconceptions-topic']}"`);
+            if (currentFormData['existing-misconceptions']) contextParts.push(`considering these existing misconceptions: "${currentFormData['existing-misconceptions']}"`);
+
+
+            if (currentFormData['australian-curriculum']) {
+                contextParts.push(`aligned with the Australian Curriculum Version 9, specifically: "${currentFormData['australian-curriculum']}"`);
+            }
+            if (currentFormData['additional-notes']) contextParts.push(`Additional notes/constraints: "${currentFormData['additional-notes']}"`);
+
+            if (contextParts.length > 0) {
+                promptParts.push(`(${contextParts.join(' ')})`);
+            }
+
+            // 4. Format
+            const formatValue = otherFormatInput.value.trim() || selectedFormat;
+            if (formatValue) {
+                promptParts.push(`${formatValue}.`);
+            } else {
+                promptParts.push(`as a detailed response.`); // Default format
+            }
+
+            generatedPrompt = promptParts.join(' ').replace(/\s+\./g, '.').trim(); // Clean up extra spaces before periods
+            generatedPromptDisplay.textContent = generatedPrompt;
+
+            copyPromptBtn.disabled = false;
+            askAiBtn.disabled = false;
+        }
+
+        /**
+         * Conditionally displays Gemini-powered buttons based on context.
+         */
+        function displayGeminiPoweredButtons() {
+            // Hide all by default and show relevant ones based on current state
+            hideAllGeminiButtons();
+
+            if (generatedPrompt) {
+                generateMoreIdeasBtn.classList.remove('hidden');
+                translatePlainLangBtn.classList.remove('hidden');
+            }
+
+            // Check conditions for specific buttons
+            const hasTopic = currentFormData.topic && currentFormData.topic.trim() !== '';
+            // Note: gradeLevel check here will use selectedPersonaYearLevel as it's the source of truth now
+            const hasGradeLevel = selectedPersonaYearLevel && selectedPersonaYearLevel.trim() !== '';
+            const hasLearningObjective = (currentFormData['learning-objective-verb'] && currentFormData['learning-objective-verb'].trim() !== '') ||
+                                         (currentFormData['learning-objective-content'] && currentFormData['learning-objective-content'].trim() !== '');
+            const hasMainContent = currentFormData['main-content'] && currentFormData['main-content'].trim() !== ''; // This is for summarize/explain/differentiate content
+            const hasOriginalText = currentFormData['original-text'] && currentFormData['original-text'].trim() !== ''; // For rewrite task
+            const hasDifferentiateContent = currentFormData['differentiate-content'] && currentFormData['differentiate-content'].trim() !== ''; // For differentiate task
+
+            // Generate Quiz Questions (Context: topic, learning objective)
+            if (hasTopic && hasLearningObjective) {
+                generateQuizBtn.classList.remove('hidden');
+            }
+
+            // Suggest Learning Strategies (Context: topic/objective)
+            if ((hasTopic || hasLearningObjective)) {
+                suggestStrategiesBtn.classList.remove('hidden');
+            }
+
+            // Break Down Concept (Task: Explain a concept, Context: topic)
+            if (selectedTask.includes('Explain a concept') && hasTopic) {
+                breakDownConceptBtn.classList.remove('hidden');
+            }
+
+            // Generate Icebreaker/Warm-up Idea (Context: topic, grade level)
+            if (hasTopic && hasGradeLevel) {
+                generateIcebreakerWarmupBtn.classList.remove('hidden');
+            }
+
+            // Generate Study Questions (Context: topic, learning objective)
+            if (hasTopic && hasLearningObjective) {
+                generateStudyQuestionsBtn.classList.remove('hidden');
+            }
+
+            // Create Vocabulary Flashcards (Context: topic or original text/summary content/differentiate content)
+            if (hasTopic || hasOriginalText || hasMainContent || hasDifferentiateContent || (currentFormData['summary-content'] && currentFormData['summary-content'].trim() !== '')) {
+                createVocabularyFlashcardsBtn.classList.remove('hidden');
+            }
+
+            // Suggest Differentiated Activities (Context: topic, grade level, objective)
+            if (hasTopic && hasGradeLevel && hasLearningObjective) {
+                suggestDifferentiatedActivitiesBtn.classList.remove('hidden');
+            }
+
+            // Generate Differentiated Text (Task: Differentiate content or Rewrite text, Context: differentiate-content or original-text)
+            if ((selectedTask.includes('Differentiate content') && hasDifferentiateContent) || (selectedTask.includes('Rewrite text') && hasOriginalText)) {
+                generateDifferentiatedTextBtn.classList.remove('hidden');
+            }
+
+            // Suggest Assessment Formats (Context: topic or learning objective)
+            if (hasTopic || hasLearningObjective) {
+                suggestAssessmentFormatsBtn.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Helper function to hide all Gemini-powered buttons.
+         */
+        function hideAllGeminiButtons() {
+            generateQuizBtn.classList.add('hidden');
+            suggestStrategiesBtn.classList.add('hidden');
+            translatePlainLangBtn.classList.add('hidden');
+            generateMoreIdeasBtn.classList.add('hidden');
+            breakDownConceptBtn.classList.add('hidden');
+            suggestWarmUpBtn.classList.add('hidden');
+            generateStudyQuestionsBtn.classList.add('hidden');
+            createVocabularyFlashcardsBtn.classList.add('hidden');
+            suggestDifferentiatedActivitiesBtn.classList.add('hidden');
+            generateIcebreakerWarmupBtn.classList.add('hidden');
+            generateDifferentiatedTextBtn.classList.add('hidden');
+            suggestAssessmentFormatsBtn.classList.add('hidden');
+            createVocabularyListBtn.classList.add('hidden'); // This specific button might be redundant if flashcards cover it
+        }
+
+
+        /**
+         * Calls the Gemini API with the given prompt and displays the response.
+         * @param {string} prompt - The prompt to send to the AI.
+         */
+        async function askAI(prompt) {
+            aiResponseDisplay.innerHTML = ''; // Use innerHTML for formatted content
+            aiResponseSection.classList.remove('hidden');
+            loadingIndicator.classList.remove('hidden');
+
+            // Construct full persona string for AI calls (re-using persona logic from generatePrompt)
+            let fullPersona = '';
+            const personaYearLevel = personaYearLevelSelect.value.trim();
+            const personaRole = personaRoleSelect.value.trim();
+            const additionalPersona = additionalPersonaContextInput.value.trim();
+
+            if (personaYearLevel && personaRole) {
+                fullPersona = `a ${personaYearLevel} ${personaRole}`;
+            } else if (personaRole) {
+                fullPersona = `a ${personaRole}`;
+            } else if (personaYearLevel) {
+                 fullPersona = `a ${personaYearLevel} student/teacher`;
+            }
+            if (additionalPersona) {
+                if (fullPersona) {
+                    fullPersona += ` ${additionalPersona}`;
+                } else {
+                    fullPersona = additionalPersona;
+                }
+            }
+            if (!fullPersona) {
+                fullPersona = "an AI assistant for educators"; // Default if nothing selected
+            }
+
+            try {
+                let chatHistory = [];
+                // Prepend persona to the prompt for more guided AI responses
+                let finalPrompt = `You are ${fullPersona}. ${prompt}`;
+                chatHistory.push({ role: "user", parts: [{ text: finalPrompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Leave as empty string for Canvas environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API call failed with status ${response.status}: ${errorText}`);
+                }
+
+                const result = await response.json(); 
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    aiResponseDisplay.innerHTML = formatAIResponse(text); // Format the text before displaying
+                } else {
+                    aiResponseDisplay.innerHTML = 'Sorry, I could not get a structured response from the AI. The response was unexpected.';
+                    console.error('AI response structure unexpected:', result);
+                }
+            } catch (error) {
+                aiResponseDisplay.innerHTML = 'An error occurred while connecting to the AI. Please check your network and try again.';
+                console.error('Error calling AI API:', error);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Resets the application to its initial state.
+         */
+        function resetApp() {
+            selectedPersonaYearLevel = '';
+            selectedPersonaRole = '';
+            selectedTask = '';
+            selectedFormat = '';
+            generatedPrompt = '';
+            currentFormData = {};
+            specificsForm.innerHTML = '';
+            personaYearLevelSelect.value = '';
+            personaRoleSelect.value = '';
+            additionalPersonaContextInput.value = '';
+            otherFormatInput.value = '';
+            // Clear selected class from format buttons
+            step4.querySelectorAll('.btn-primary[data-format]').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            generatedPromptDisplay.textContent = 'Your prompt will appear here.';
+            aiResponseDisplay.innerHTML = 'The AI\'s response will appear here.'; // Use innerHTML
+            copyPromptBtn.disabled = true;
+            askAiBtn.disabled = true;
+            hideAllGeminiButtons(); // Hide all custom AI buttons
+            updateGeneratePromptButtonState(); // Ensure button is disabled on reset
+            showStep(step1);
+        }
+
+        /**
+         * Custom alert message function (replaces native alert for better UI/UX in Canvas).
+         * @param {string} message - The message to display.
+         */
+        function alertMessage(message) {
+            const existingMessage = document.getElementById('custom-alert-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            const alertDiv = document.createElement('div');
+            alertDiv.id = 'custom-alert-message';
+            alertDiv.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+            alertDiv.textContent = message;
+            document.body.appendChild(alertDiv);
+
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                alertDiv.addEventListener('transitionend', () => alertDiv.remove());
+            }, 3000);
+        }
+
+        /**
+         * Formats raw text response from AI into HTML with paragraphs and lists.
+         * Attempts to detect markdown-like lists and paragraph breaks.
+         * @param {string} text - The raw text from the AI.
+         * @returns {string} HTML formatted text.
+         */
+        function formatAIResponse(text) {
+            const blocks = text.split(/\n\s*\n/); // Split by one or more blank lines
+            let htmlOutput = [];
+
+            blocks.forEach(block => {
+                const lines = block.split('\n').filter(line => line.trim().length > 0); // Filter out empty lines within a block
+                if (lines.length === 0) return; // Skip empty blocks
+
+                // Check if the block looks like a list
+                let isListBlock = false;
+                let firstMarkerType = null; // 'ul' or 'ol'
+
+                if (lines.length > 0) {
+                    const firstLineTrimmed = lines[0].trim();
+                    if (firstLineTrimmed.match(/^(\*|-)\s/)) {
+                        isListBlock = true;
+                        firstMarkerType = 'ul';
+                    } else if (firstLineTrimmed.match(/^\d+\.\s/)) {
+                        isListBlock = true;
+                        firstMarkerType = 'ol';
+                    }
+                }
+
+                if (isListBlock) {
+                    let listHtml = [];
+                    let currentListType = firstMarkerType;
+                    let currentListItems = [];
+
+                    lines.forEach(line => {
+                        const trimmedLine = line.trim();
+                        const bulletMatch = trimmedLine.match(/^(\*|-)\s*(.*)$/);
+                        const numberedMatch = trimmedLine.match(/^\d+\.\s*(.*)$/);
+
+                        let lineType = null;
+                        let itemText = '';
+
+                        if (bulletMatch) {
+                            lineType = 'ul';
+                            itemText = bulletMatch[2].trim();
+                        } else if (numberedMatch) {
+                            lineType = 'ol';
+                            itemText = numberedMatch[2].trim();
+                        }
+
+                        if (lineType) {
+                            if (currentListType && currentListType !== lineType) {
+                                // Type changed, close previous list and start new one
+                                if (currentListItems.length > 0) {
+                                    listHtml.push(`<${currentListType}>${currentListItems.join('')}</${currentListType}>`);
+                                }
+                                currentListItems = [];
+                                currentListType = lineType;
+                            } else if (!currentListType) {
+                                // First list item in a sub-block
+                                currentListType = lineType;
+                            }
+                            currentListItems.push(`<li>${itemText}</li>`);
+                        } else {
+                            // Not a list item, so it's a paragraph within this block or after a list.
+                            // Flush any pending list first.
+                            if (currentListItems.length > 0) {
+                                listHtml.push(`<${currentListType}>${currentListItems.join('')}</${currentListType}>`);
+                                currentListItems = [];
+                                currentListType = null; // Reset list context
+                            }
+                            // Add as a paragraph part. Replace internal newlines with <br>
+                            listHtml.push(`<p>${trimmedLine.replace(/\n/g, '<br>')}</p>`);
+                        }
+                    });
+
+                    // Flush any remaining list items at the end of the block
+                    if (currentListItems.length > 0) {
+                        listHtml.push(`<${currentListType}>${currentListItems.join('')}</${currentListType}>`);
+                    }
+                    htmlOutput.push(listHtml.join(''));
+
+                } else {
+                    // This block is not a list, treat as a regular paragraph
+                    htmlOutput.push(`<p>${block.replace(/\n/g, '<br>')}</p>`);
+                }
+            });
+
+            return htmlOutput.join('');
+        }
+
+        // Function to enable/disable generatePromptBtn based on format selection
+        function updateGeneratePromptButtonState() {
+            const isFormatSelected = selectedFormat !== '' || otherFormatInput.value.trim() !== '';
+            generatePromptBtn.disabled = !isFormatSelected;
+            if (isFormatSelected) {
+                generatePromptBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                generatePromptBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        /**
+         * Updates the enabled/disabled state of task buttons based on the selected persona role.
+         */
+        function updateTaskButtonStates() {
+            const taskButtons = step2.querySelectorAll('.btn-primary[data-task]');
+            const currentRole = personaRoleSelect.value.trim();
+
+            taskButtons.forEach(button => {
+                const allowedRolesStr = button.dataset.allowedRoles;
+                if (!allowedRolesStr) { // If no specific roles are defined, it's allowed for all by default
+                    button.classList.remove('task-disabled');
+                    button.disabled = false;
+                    return;
+                }
+
+                const allowedRoles = allowedRolesStr.split(',').map(role => role.trim());
+                if (allowedRoles.includes(currentRole) || currentRole === '') { // Allow all if no role selected (initial state)
+                    button.classList.remove('task-disabled');
+                    button.disabled = false;
+                } else {
+                    button.classList.add('task-disabled');
+                    button.disabled = true;
+                }
+            });
+            selectedTask = ''; // Reset selected task when persona changes
+        }
+
+
+        // --- Event Listeners ---
+
+        // Previous Page button logic
+        previousPageBtn.addEventListener('click', () => {
+            if (currentStep === 2) { // From Task to Persona
+                showStep(step1);
+            } else if (currentStep === 3) { // From Context to Task
+                showStep(step2);
+            } else if (currentStep === 4) { // From Format to Context
+                showStep(step3);
+            } else if (currentStep === 5) { // From Prompt Output to Format
+                showStep(step4);
+            } else if (currentStep === 6) { // From AI Response to Prompt Output
+                showStep(promptOutputSection);
+            }
+        });
+
+        // Step 1: Persona dropdown selections
+        personaYearLevelSelect.addEventListener('change', (event) => {
+            selectedPersonaYearLevel = event.target.value;
+            updateTaskButtonStates(); // Update task button states on year level change (less critical but good practice)
+        });
+
+        personaRoleSelect.addEventListener('change', (event) => {
+            selectedPersonaRole = event.target.value;
+            updateTaskButtonStates(); // Crucial: Update task button states on role change
+        });
+
+        // Handle "Next: Choose Task" button
+        nextToTaskBtn.addEventListener('click', () => {
+            if (!personaYearLevelSelect.value.trim() && !personaRoleSelect.value.trim() && !additionalPersonaContextInput.value.trim()) {
+                alertMessage('Please select a year level and/or role, or enter additional persona context.');
+                return;
+            }
+            showStep(step2);
+        });
+
+        // Step 2: Task selection
+        step2.querySelectorAll('.btn-primary[data-task]').forEach(button => {
+            button.addEventListener('click', () => {
+                if (button.disabled) {
+                    alertMessage('This task is not available for the selected persona.');
+                    return;
+                }
+                selectedTask = button.dataset.task;
+                renderContextInputs(); // Render context inputs based on selected task
+                showStep(step3);
+            });
+        });
+
+        // Handle "Next: Choose Format" button
+        nextToFormatBtn.addEventListener('click', () => {
+            // Validate required fields in Context form before proceeding
+            const requiredInputs = specificsForm.querySelectorAll('input[required], textarea[required]');
+            let allRequiredFilled = true;
+            requiredInputs.forEach(input => {
+                if (input.value.trim() === '') {
+                    allRequiredFilled = false;
+                    input.classList.add('border-red-500'); // Highlight empty required fields
+                } else {
+                    input.classList.remove('border-red-500');
+                }
+            });
+
+            if (!allRequiredFilled) {
+                alertMessage('Please fill in all required fields in the Context section.');
+                return;
+            }
+            showStep(step4);
+        });
+
+        // Step 4: Format selection
+        step4.querySelectorAll('.btn-primary[data-format]').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove 'selected' class from all format buttons
+                step4.querySelectorAll('.btn-primary[data-format]').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                // Add 'selected' class to the clicked button
+                button.classList.add('selected');
+
+                selectedFormat = button.dataset.format;
+                otherFormatInput.value = ''; // Clear other format if a button is selected
+                updateGeneratePromptButtonState();
+            });
+        });
+
+        otherFormatInput.addEventListener('input', () => {
+            selectedFormat = ''; // Ensure selectedFormat is cleared if typing in custom
+            // Remove 'selected' class from all format buttons
+            step4.querySelectorAll('.btn-primary[data-format]').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            updateGeneratePromptButtonState();
+        });
+
+
+        // Generate Prompt button (now in Step 4)
+        generatePromptBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!selectedFormat && !otherFormatInput.value.trim()) {
+                alertMessage('Please select a format or enter one in the "Other Format" field.');
+                return;
+            }
+            generatePrompt();
+            showStep(promptOutputSection);
+            displayGeminiPoweredButtons();
+        });
+
+        // Copy Prompt button
+        copyPromptBtn.addEventListener('click', () => {
+            const textarea = document.createElement('textarea');
+            textarea.value = generatedPrompt;
+            textarea.style.position = 'fixed';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alertMessage('Prompt copied to clipboard!');
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                alertMessage('Failed to copy prompt. Please copy manually.');
+            }
+            document.body.removeChild(textarea);
+        });
+
+        // Ask AI button
+        askAiBtn.addEventListener('click', () => {
+            if (generatedPrompt) {
+                askAI(generatedPrompt);
+            } else {
+                alertMessage('Please generate a prompt first!');
+            }
+        });
+
+        // Existing Gemini-powered buttons (logic for these prompts needs re-checking against new structure)
+        generateQuizBtn.addEventListener('click', () => {
+            const topic = currentFormData.topic || '';
+            const gradeLevel = selectedPersonaYearLevel || ''; // Use selectedPersonaYearLevel
+            const learningObjectiveContent = currentFormData['learning-objective-content'] || '';
+            if (topic && learningObjectiveContent) {
+                let quizPrompt = `Generate 3-5 quiz questions (mix of multiple choice and short answer) `;
+                quizPrompt += `on the topic of "${topic}" suitable for ${gradeLevel} students to assess understanding of "${learningObjectiveContent}" with answers provided.`;
+                askAI(quizPrompt);
+            } else {
+                alertMessage('Please ensure "Topic" and "Learning Objective" are provided in the Context section to generate quiz questions.');
+            }
+        });
+
+        suggestStrategiesBtn.addEventListener('click', () => {
+            const topic = currentFormData.topic || '';
+            const gradeLevel = selectedPersonaYearLevel || ''; // Use selectedPersonaYearLevel
+            const learningObjectiveVerb = currentFormData['learning-objective-verb'] || '';
+            const learningObjectiveContent = currentFormData['learning-objective-content'] || '';
+
+            if (topic && (learningObjectiveVerb || learningObjectiveContent)) {
+                let strategiesPrompt = `Suggest 3-5 effective learning strategies or teaching methods `;
+                strategiesPrompt += `for a lesson on "${topic}" for ${gradeLevel} students to help them learn how to ${learningObjectiveVerb} ${learningObjectiveContent}.`;
+                askAI(strategiesPrompt);
+            } else {
+                alertMessage('Please ensure "Topic" and "Learning Objective" are provided in the Context section to suggest learning strategies.');
+            }
+        });
+
+        translatePlainLangBtn.addEventListener('click', () => {
+            // This button now specifically targets the original text if available, or the generated prompt
+            const textToSimplify = currentFormData['original-text'] || generatedPromptDisplay.textContent;
+            if (textToSimplify) {
+                const plainLanguagePrompt = `Rewrite the following text in plain, easy-to-understand language, suitable for a general audience or younger students. Maintain original meaning but simplify vocabulary and sentence structure: "${textToSimplify}"`;
+                askAI(plainLanguagePrompt);
+            } else {
+                alertMessage('There is no prompt or original text to translate yet!');
+            }
+        });
+
+        generateMoreIdeasBtn.addEventListener('click', () => {
+            const promptForIdeas = `Given the prompt: "${generatedPrompt}" Provide 3 alternative ideas or variations for the requested content, ensuring they meet the original constraints.`;
+            askAI(promptForIdeas);
+        });
+
+        breakDownConceptBtn.addEventListener('click', () => {
+            const topic = currentFormData.topic || '';
+            const gradeLevel = selectedPersonaYearLevel || 'general audience'; // Use selectedPersonaYearLevel
+            if (topic) {
+                const promptForBreakdown = `Break down the concept of "${topic}" into 5 key sub-concepts or a logical learning progression suitable for teaching ${gradeLevel}.`;
+                askAI(promptForBreakdown);
+            } else {
+                alertMessage('Please provide a "Topic/Subject" in the Context section to break down a concept.');
+            }
+        });
+
+        generateIcebreakerWarmupBtn.addEventListener('click', () => {
+            const topic = currentFormData.topic || '';
+            const gradeLevel = selectedPersonaYearLevel || 'general audience'; // Use selectedPersonaYearLevel
+            if (topic && gradeLevel) {
+                const promptForWarmup = `Suggest 1-2 engaging warm-up or icebreaker activities for a lesson on "${topic}" suitable for ${gradeLevel} students. Each activity should take no more than 5-10 minutes.`;
+                askAI(promptForWarmup);
+            } else {
+                alertMessage('Please ensure "Topic/Subject" and "Year Level/Audience" are provided in the Context section to suggest warm-ups.');
+            }
+        });
+
+        generateDifferentiatedTextBtn.addEventListener('click', () => {
+            const originalText = currentFormData['differentiate-content'] || currentFormData['original-text'] || currentFormData['summary-content'] || generatedPromptDisplay.textContent;
+            const targetYearLevel = selectedPersonaYearLevel || 'a general audience'; // Use selectedPersonaYearLevel
+            if (originalText) {
+                const differentiatePrompt = `Rewrite the following text for a ${targetYearLevel} reading level, making it simpler to understand:\n\n"${originalText}"`;
+                askAI(differentiatePrompt);
+            } else {
+                alertMessage('Please provide text to differentiate in the Context section (e.g., "Content to differentiate", "Original text to rewrite", or "Content to summarise").');
+            }
+        });
+
+        suggestAssessmentFormatsBtn.addEventListener('click', () => {
+            const topic = currentFormData.topic || '';
+            const gradeLevel = selectedPersonaYearLevel || ''; // Use selectedPersonaYearLevel
+            const learningObjectiveVerb = currentFormData['learning-objective-verb'] || '';
+            const learningObjectiveContent = currentFormData['learning-objective-content'] || '';
+
+            if (topic || (learningObjectiveVerb || learningObjectiveContent)) {
+                let assessmentPrompt = `Suggest 3-5 varied assessment formats or strategies `;
+                if (topic) assessmentPrompt += `for a unit on "${topic}"`;
+                if (gradeLevel) assessmentPrompt += ` for ${gradeLevel} students`;
+                if (learningObjectiveVerb || learningObjectiveContent) {
+                    assessmentPrompt += ` to assess the objective: "Students will be able to ${learningObjectiveVerb} ${learningObjectiveContent}".`;
+                }
+                assessmentPrompt += ` Include brief descriptions of each.`;
+                askAI(assessmentPrompt);
+            } else {
+                alertMessage('Please ensure "Topic/Subject" or "Learning Objective" are provided in the Context section to suggest assessment formats.');
+            }
+        });
+
+        createVocabularyFlashcardsBtn.addEventListener('click', () => {
+            const topic = currentFormData.topic || '';
+            const mainContent = currentFormData['summary-content'] || currentFormData['original-text'] || '';
+            const gradeLevel = selectedPersonaYearLevel || ''; // Use selectedPersonaYearLevel
+            let vocabularyPrompt = `Create a list of 10 key vocabulary words with Australian English definitions and a short example sentence for each word, suitable for ${gradeLevel || 'a general audience'}. `;
+
+            if (mainContent) {
+                vocabularyPrompt += `from the following text: "${mainContent}"`;
+            } else if (topic) {
+                vocabularyPrompt += `for the topic "${topic}"`;
+            } else {
+                alertMessage('Please provide a "Topic/Subject" or relevant content in the Context section to create a vocabulary list.');
+                return;
+            }
+            askAI(vocabularyPrompt);
+        });
+
+        generateStudyQuestionsBtn.addEventListener('click', () => {
+            const topic = currentFormData.topic || '';
+            const gradeLevel = selectedPersonaYearLevel || 'a general audience'; // Use selectedPersonaYearLevel
+            const learningObjectiveContent = currentFormData['learning-objective-content'] || '';
+
+            if (topic && learningObjectiveContent) {
+                const studyQuestionsPrompt = `Generate 5 open-ended study questions (and answers) on the topic of "${topic}" for ${gradeLevel} students to review their understanding of "${learningObjectiveContent}".`;
+                askAI(studyQuestionsPrompt);
+            } else {
+                alertMessage('Please ensure "Topic/Subject" and "Learning Objective" are provided in the Context section to generate study questions.');
+            }
+        });
+
+        suggestDifferentiatedActivitiesBtn.addEventListener('click', () => {
+            const topic = currentFormData.topic || '';
+            const gradeLevel = selectedPersonaYearLevel || ''; // Use selectedPersonaYearLevel
+            const learningObjectiveVerb = currentFormData['learning-objective-verb'] || '';
+            const learningObjectiveContent = currentFormData['learning-objective-content'] || '';
+
+            if (topic && gradeLevel && (learningObjectiveVerb || learningObjectiveContent)) {
+                let differentiatedActivitiesPrompt = `Suggest 3 differentiated activities for a lesson on "${topic}" for ${gradeLevel} students with the learning objective: "Students will be able to ${learningObjectiveVerb} ${learningObjectiveContent}". Provide one activity suitable for struggling learners, one for on-level learners, and one for advanced learners.`;
+                askAI(differentiatedActivitiesPrompt);
+            } else {
+                alertMessage('Please ensure "Topic/Subject", "Year Level/Audience", and "Learning Objective" are provided in the Context section to suggest differentiated activities.');
+            }
+        });
+
+
+        // Start Over button
+        startOverBtn.addEventListener('click', () => {
+            resetApp();
+        });
+
+        // --- Theme Toggling Logic ---
+        function applyTheme(theme) {
+            const iconSpan = themeToggle.querySelector('.icon');
+            const textSpan = themeToggle.querySelector('span:last-child');
+
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                iconSpan.textContent = '☀️'; // Button will switch to Light Mode
+                textSpan.textContent = 'Light Mode';
+                themeToggle.setAttribute('aria-label', 'Switch to light mode');
+            } else {
+                body.classList.remove('dark-mode');
+                iconSpan.textContent = '🌙'; // Button will switch to Dark Mode
+                textSpan.textContent = 'Dark Mode';
+                themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        // Load theme from localStorage on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+        });
+
+        // Toggle theme on button click
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        });
+
+        // Initialize the app by showing the first step
+        showStep(step1);
+    </script>
+</body>
+</html>
