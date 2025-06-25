@@ -850,7 +850,7 @@
                 let finalPrompt = `You are ${fullPersona}. ${prompt}`;
                 chatHistory.push({ role: "user", parts: [{ text: finalPrompt }] });
                 const payload = { contents: chatHistory };
-                const apiKey = ""; // Leave as empty string for Canvas environment
+                const apiKey = "AIzaSyA-2OvcdSoMsw5dVAPSsG4XD2SwhDo3IDw"; // Leave as empty string for Canvas environment
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
